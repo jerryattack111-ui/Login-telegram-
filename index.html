@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Telegram Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --tg-blue: #2AABEE;
+      --tg-dark: #0088CC;
+      --bg: #0a0e1a;
+      --surface: #111827;
+      --surface2: #1a2235;
+      --border: rgba(42,171,238,0.18);
+      --text: #e8f4fd;
+      --muted: #6b8caa;
+      --success: #2ee89a;
+      --mono: 'JetBrains Mono', monospace;
+    }
+
+    body {
+      font-family: 'Sora', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow-x: hidden;
+    }
+
+    /* Animated background */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 20% 20%, rgba(42,171,238,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 50% at 80% 80%, rgba(0,136,204,0.06) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .grid-bg {
+      position: fixed; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(rgba(42,171,238,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(42,171,238,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+    }
+
+    .container {
+      position: relative; z-index: 1;
+      width: 100%; max-width: 460px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .tg-icon {
+      width: 72px; height: 72px;
+      background: linear-gradient(135deg, var(--tg-blue), var(--tg-dark));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 36px;
+      box-shadow: 0 0 40px rgba(42,171,238,0.35);
+      animation: pulse-ring 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse-ring {
+      0%, 100% { box-shadow: 0 0 40px rgba(42,171,238,0.35); }
+      50% { box-shadow: 0 0 60px rgba(42,171,238,0.55), 0 0 80px rgba(42,171,238,0.2); }
+    }
+
+    .header h1 {
+      font-size: 26px; font-weight: 700;
+      background: linear-gradient(135deg, #fff 0%, var(--tg-blue) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+    }
+
+    .header p {
+      color: var(--muted); font-size: 13.5px; margin-top: 6px;
+      font-weight: 300;
+    }
+
+    /* Card */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+    }
+
+    /* Steps indicator */
+    .steps {
+      display: flex; align-items: center; justify-content: center;
+      gap: 0; margin-bottom: 28px;
+    }
+
+    .step {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 600; color: var(--muted);
+      transition: color 0.3s;
+    }
+
+    .step.active { color: var(--tg-blue); }
+    .step.done { color: var(--success); }
+
+    .step-num {
+      width: 26px; height: 26px; border-radius: 50%;
+      border: 2px solid currentColor;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700;
+      transition: all 0.3s;
+    }
+
+    .step.active .step-num { background: var(--tg-blue); color: #fff; border-color: var(--tg-blue); }
+    .step.done .step-num { background: var(--success); color: #fff; border-color: var(--success); }
+
+    .step-line {
+      flex: 1; height: 2px; max-width: 40px; margin: 0 6px;
+      background: var(--border);
+      position: relative; overflow: hidden;
+    }
+
+    .step-line.done::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: var(--success);
+      animation: fill-line 0.4s ease forwards;
+    }
+
+    @keyframes fill-line {
+      from { width: 0; } to { width: 100%; }
+    }
+
+    /* Form */
+    .form-group { margin-bottom: 20px; }
+
+    label {
+      display: block; font-size: 12px; font-weight: 600;
+      color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px;
+      margin-bottom: 8px;
+    }
+
+    .input-wrap { position: relative; }
+
+    input[type="text"], input[type="password"] {
+      width: 100%; padding: 13px 16px;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-family: var(--mono); font-size: 13px;
+      outline: none; transition: all 0.2s;
+    }
+
+    input:focus {
+      border-color: var(--tg-blue);
+      box-shadow: 0 0 0 3px rgba(42,171,238,0.12);
+    }
+
+    .toggle-vis {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      color: var(--muted); font-size: 16px; padding: 4px;
+      transition: color 0.2s;
+    }
+    .toggle-vis:hover { color: var(--tg-blue); }
+
+    .hint {
+      font-size: 11px; color: var(--muted); margin-top: 6px;
+      line-height: 1.5;
+    }
+
+    .hint a { color: var(--tg-blue); text-decoration: none; }
+    .hint a:hover { text-decoration: underline; }
+
+    /* Buttons */
+    .btn {
+      width: 100%; padding: 14px;
+      border-radius: 12px; border: none; cursor: pointer;
+      font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 600;
+      transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--tg-blue) 0%, var(--tg-dark) 100%);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(42,171,238,0.3);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 28px rgba(42,171,238,0.45);
+    }
+
+    .btn-primary:active:not(:disabled) { transform: translateY(0); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-secondary {
+      background: var(--surface2); color: var(--muted);
+      border: 1.5px solid var(--border); margin-top: 10px; font-size: 13px;
+    }
+    .btn-secondary:hover { border-color: var(--tg-blue); color: var(--tg-blue); }
+
+    /* Divider */
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+      color: var(--muted); font-size: 12px; margin: 24px 0;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* Widget area */
+    #widget-section { display: none; animation: fade-in 0.4s ease; }
+
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .widget-box {
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      text-align: center;
+      min-height: 80px;
+      display: flex; align-items: center; justify-content: center; flex-direction: column;
+      gap: 12px;
+    }
+
+    .widget-loading {
+      color: var(--muted); font-size: 13px;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid var(--border);
+      border-top-color: var(--tg-blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Profile card (after login) */
+    #profile-section { display: none; animation: fade-in 0.5s ease; }
+
+    .profile-card {
+      background: linear-gradient(135deg, rgba(42,171,238,0.08) 0%, rgba(0,136,204,0.05) 100%);
+      border: 1.5px solid rgba(42,171,238,0.25);
+      border-radius: 16px; padding: 24px;
+      text-align: center;
+    }
+
+    .profile-avatar {
+      width: 80px; height: 80px; border-radius: 50%;
+      border: 3px solid var(--tg-blue);
+      margin: 0 auto 16px;
+      box-shadow: 0 0 30px rgba(42,171,238,0.3);
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+
+    .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .profile-avatar span { font-size: 36px; }
+
+    .profile-name {
+      font-size: 20px; font-weight: 700; margin-bottom: 4px;
+    }
+
+    .profile-username {
+      color: var(--tg-blue); font-family: var(--mono); font-size: 13px; margin-bottom: 20px;
+    }
+
+    .profile-data {
+      background: var(--surface);
+      border-radius: 10px; padding: 16px;
+      text-align: left; margin-top: 16px;
+    }
+
+    .data-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px;
+    }
+    .data-row:last-child { border-bottom: none; }
+    .data-row .key { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .data-row .val { font-family: var(--mono); font-size: 12px; color: var(--text); }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(46,232,154,0.12); color: var(--success);
+      border: 1px solid rgba(46,232,154,0.25);
+      padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    /* Alert */
+    .alert {
+      padding: 12px 16px; border-radius: 10px;
+      font-size: 13px; margin-top: 16px;
+      display: none; align-items: flex-start; gap: 10px;
+    }
+
+    .alert-error { background: rgba(255,80,80,0.1); border: 1px solid rgba(255,80,80,0.25); color: #ff8080; }
+    .alert-info { background: rgba(42,171,238,0.08); border: 1px solid rgba(42,171,238,0.2); color: var(--tg-blue); }
+
+    .alert.show { display: flex; }
+
+    /* Info block */
+    .info-block {
+      background: rgba(42,171,238,0.06);
+      border-left: 3px solid var(--tg-blue);
+      border-radius: 0 10px 10px 0;
+      padding: 12px 14px;
+      font-size: 12px; color: var(--muted); line-height: 1.6;
+      margin-top: 16px;
+    }
+
+    .info-block strong { color: var(--text); }
+  </style>
+</head>
+<body>
+  <div class="grid-bg"></div>
+
+  <div class="container">
+    <div class="header">
+      <div class="tg-icon">✈️</div>
+      <h1>Telegram Auth Portal</h1>
+      <p>ចូលប្រព័ន្ធដោយប្រើ Telegram Bot Widget</p>
+    </div>
+
+    <div class="card">
+      <!-- Steps -->
+      <div class="steps" id="steps">
+        <div class="step active" id="step1">
+          <div class="step-num">1</div>
+          <span>Bot Setup</span>
+        </div>
+        <div class="step-line" id="line1"></div>
+        <div class="step" id="step2">
+          <div class="step-num">2</div>
+          <span>Login</span>
+        </div>
+        <div class="step-line" id="line2"></div>
+        <div class="step" id="step3">
+          <div class="step-num">3</div>
+          <span>Profile</span>
+        </div>
+      </div>
+
+      <!-- Section 1: Bot Token Setup -->
+      <div id="setup-section">
+        <div class="form-group">
+          <label>Bot Username</label>
+          <div class="input-wrap">
+            <input type="text" id="bot-username" placeholder="MyLoginBot" />
+          </div>
+          <div class="hint">
+            ឈ្មោះ Bot (គ្មាន @) — ដើម្បីបង្ហាញ Telegram Login Widget<br/>
+            បង្កើត Bot នៅ <a href="https://t.me/BotFather" target="_blank">@BotFather</a> → <code>/newbot</code>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Bot Token (Optional — for verification)</label>
+          <div class="input-wrap">
+            <input type="password" id="bot-token" placeholder="123456789:AAF..." />
+            <button class="toggle-vis" onclick="toggleToken()" title="Show/Hide">👁</button>
+          </div>
+          <div class="hint">
+            Token ពី BotFather — ប្រើសម្រាប់ verify data នៅ server side
+          </div>
+        </div>
+
+        <div id="alert-setup" class="alert alert-error"></div>
+
+        <button class="btn btn-primary" onclick="loadWidget()">
+          <span>🚀</span> Load Telegram Widget
+        </button>
+
+        <div class="info-block">
+          <strong>⚙️ Setup ជាមុនសិន:</strong> ទៅ BotFather → <code>/setdomain</code>
+          → វាយ domain website របស់អ្នក (e.g. <code>yourdomain.com</code>) ដើម្បី Widget ដំណើរការ
+        </div>
+      </div>
+
+      <!-- Section 2: Telegram Widget -->
+      <div id="widget-section">
+        <div style="text-align:center; margin-bottom:20px;">
+          <p style="font-size:13px; color:var(--muted);">ចុច Login ខាងក្រោម ដើម្បីភ្ជាប់ Telegram</p>
+        </div>
+
+        <div class="widget-box" id="widget-container">
+          <div class="widget-loading">
+            <div class="spinner"></div>
+            <span>Loading widget...</span>
+          </div>
+        </div>
+
+        <div id="alert-widget" class="alert alert-error"></div>
+
+        <button class="btn btn-secondary" onclick="resetSetup()">← ត្រឡប់ Setup</button>
+      </div>
+
+      <!-- Section 3: Profile -->
+      <div id="profile-section">
+        <div class="profile-card">
+          <div class="badge">✅ Login ជោគជ័យ!</div>
+
+          <div class="profile-avatar" id="avatar-wrap">
+            <span>👤</span>
+          </div>
+
+          <div class="profile-name" id="profile-name">—</div>
+          <div class="profile-username" id="profile-username">—</div>
+
+          <div class="profile-data" id="profile-data"></div>
+        </div>
+
+        <div id="alert-profile" class="alert alert-info"></div>
+
+        <button class="btn btn-secondary" style="margin-top:16px;" onclick="resetAll()">
+          🔄 Login ម្តងទៀត
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    let botUsername = '';
+
+    function toggleToken() {
+      const t = document.getElementById('bot-token');
+      t.type = t.type === 'password' ? 'text' : 'password';
+    }
+
+    function showAlert(id, msg, type = 'error') {
+      const el = document.getElementById(id);
+      el.className = `alert alert-${type} show`;
+      el.textContent = msg;
+    }
+
+    function hideAlert(id) {
+      document.getElementById(id).className = 'alert';
+    }
+
+    function setStep(active) {
+      [1, 2, 3].forEach(i => {
+        const s = document.getElementById(`step${i}`);
+        s.className = 'step' + (i < active ? ' done' : i === active ? ' active' : '');
+        if (i < 3) {
+          const l = document.getElementById(`line${i}`);
+          l.className = 'step-line' + (i < active ? ' done' : '');
+        }
+      });
+    }
+
+    function loadWidget() {
+      const username = document.getElementById('bot-username').value.trim().replace('@', '');
+      if (!username) {
+        showAlert('alert-setup', '⚠️ សូមបញ្ចូល Bot Username មុននឹង Load');
+        return;
+      }
+      hideAlert('alert-setup');
+      botUsername = username;
+
+      document.getElementById('setup-section').style.display = 'none';
+      document.getElementById('widget-section').style.display = 'block';
+      setStep(2);
+
+      // Load Telegram widget
+      const container = document.getElementById('widget-container');
+      container.innerHTML = '<div class="widget-loading"><div class="spinner"></div><span>Loading widget...</span></div>';
+
+      // Create script element for Telegram widget
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = 'https://telegram.org/js/telegram-widget.js?22';
+      script.setAttribute('data-telegram-login', username);
+      script.setAttribute('data-size', 'large');
+      script.setAttribute('data-radius', '10');
+      script.setAttribute('data-onauth', 'onTelegramAuth(user)');
+      script.setAttribute('data-request-access', 'write');
+
+      script.onload = () => {
+        container.innerHTML = '';
+        container.appendChild(script);
+      };
+
+      script.onerror = () => {
+        container.innerHTML = '';
+        showAlert('alert-widget', '❌ មិនអាច Load Telegram Widget បាន។ ពិនិត្យ Bot Username ឬ Domain setting');
+      };
+
+      // Append and wait
+      setTimeout(() => {
+        container.innerHTML = '';
+        container.appendChild(script);
+      }, 800);
+    }
+
+    // Called by Telegram widget after successful auth
+    window.onTelegramAuth = function(user) {
+      document.getElementById('widget-section').style.display = 'none';
+      document.getElementById('profile-section').style.display = 'block';
+      setStep(3);
+
+      // Display profile
+      document.getElementById('profile-name').textContent =
+        [user.first_name, user.last_name].filter(Boolean).join(' ') || '—';
+      document.getElementById('profile-username').textContent =
+        user.username ? '@' + user.username : '(គ្មាន username)';
+
+      // Avatar
+      const avatarWrap = document.getElementById('avatar-wrap');
+      if (user.photo_url) {
+        avatarWrap.innerHTML = `<img src="${user.photo_url}" alt="avatar" />`;
+      }
+
+      // Data table
+      const fields = [
+        ['ID', user.id],
+        ['First Name', user.first_name || '—'],
+        ['Last Name', user.last_name || '—'],
+        ['Username', user.username ? '@' + user.username : '—'],
+        ['Auth Date', new Date(user.auth_date * 1000).toLocaleString()],
+        ['Hash', user.hash ? user.hash.substring(0, 20) + '...' : '—'],
+      ];
+
+      document.getElementById('profile-data').innerHTML = fields.map(([k, v]) =>
+        `<div class="data-row"><span class="key">${k}</span><span class="val">${v}</span></div>`
+      ).join('');
+
+      showAlert('alert-profile',
+        '💡 Data នេះត្រូវ verify ម្តងទៀតនៅ Server-Side ដោយប្រើ Bot Token + HMAC-SHA256',
+        'info'
+      );
+    };
+
+    function resetSetup() {
+      document.getElementById('widget-section').style.display = 'none';
+      document.getElementById('setup-section').style.display = 'block';
+      setStep(1);
+    }
+
+    function resetAll() {
+      document.getElementById('profile-section').style.display = 'none';
+      document.getElementById('setup-section').style.display = 'block';
+      document.getElementById('bot-username').value = '';
+      document.getElementById('bot-token').value = '';
+      setStep(1);
+      hideAlert('alert-profile');
+    }
+  </script>
+</body>
+      </html>

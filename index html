@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Jerry's MC Store \u2013 Minecraft Premium</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --green: #5dff6e;
+      --dark-green: #2db83d;
+      --dirt: #8b5e3c;
+      --stone: #7e7e7e;
+      --bg: #0d0d0d;
+      --card-bg: #141414;
+      --border: #1e1e1e;
+      --text: #e8e8e8;
+      --accent: #ffcf40;
+      --red: #ff4d4d;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 17px;
+      overflow-x: hidden;
+    }
+
+    /* \u2500\u2500 PIXEL GRID BACKGROUND \u2500\u2500 */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(93,255,110,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(93,255,110,.03) 1px, transparent 1px);
+      background-size: 32px 32px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* \u2500\u2500 NAV \u2500\u2500 */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      height: 64px;
+      background: rgba(13,13,13,.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 12px;
+      color: var(--green);
+      text-shadow: 0 0 12px rgba(93,255,110,.5);
+      letter-spacing: 1px;
+    }
+    .nav-logo span { color: var(--accent); }
+
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 15px;
+      letter-spacing: .5px;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--green); }
+
+    .nav-badge {
+      background: var(--green);
+      color: #000;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px;
+      padding: 8px 14px;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s;
+      image-rendering: pixelated;
+      clip-path: polygon(4px 0%, calc(100% - 4px) 0%, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0% calc(100% - 4px), 0% 4px);
+    }
+    .nav-badge:hover { transform: scale(1.06); box-shadow: 0 0 20px rgba(93,255,110,.4); }
+
+    /* \u2500\u2500 HERO \u2500\u2500 */
+    .hero {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 88vh;
+      text-align: center;
+      padding: 60px 20px;
+      overflow: hidden;
+    }
+
+    /* Floating blocks */
+    .block {
+      position: absolute;
+      width: 48px;
+      height: 48px;
+      image-rendering: pixelated;
+      opacity: .18;
+      animation: float linear infinite;
+    }
+    .block:nth-child(1)  { left:5%;  top:20%; width:36px; height:36px; animation-duration:9s;  animation-delay:0s; }
+    .block:nth-child(2)  { left:15%; top:70%; width:56px; height:56px; animation-duration:13s; animation-delay:-3s; }
+    .block:nth-child(3)  { left:80%; top:15%; width:42px; height:42px; animation-duration:11s; animation-delay:-6s; }
+    .block:nth-child(4)  { left:88%; top:65%; width:30px; height:30px; animation-duration:8s;  animation-delay:-1s; }
+    .block:nth-child(5)  { left:50%; top:80%; width:50px; height:50px; animation-duration:15s; animation-delay:-4s; }
+    .block:nth-child(6)  { left:30%; top:10%; width:38px; height:38px; animation-duration:10s; animation-delay:-7s; }
+    .block:nth-child(7)  { left:65%; top:45
